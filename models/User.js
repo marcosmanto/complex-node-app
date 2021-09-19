@@ -1,5 +1,5 @@
 const validator = require('validator')
-
+const userCollection = require('../db').collection('users')
 let User = function (data) {
   this.data = data
   this.errors = []
@@ -32,12 +32,41 @@ User.prototype.validate = function () {
   }
 }
 
-User.prototype.register = function () {
-  // 1) Validate user data
+User.prototype.cleanUp = function() {
+  if(typeof(this.data.username) !== 'string') {
+    this.data.username = ''
+  }
+  if(typeof(this.data.email) !== 'string') {
+    this.data.email = ''
+  }
+  if(typeof(this.data.password) !== 'string') {
+    this.data.password = ''
+  }
+
+  // get rid of any bogus properties
+  this.data = {
+    username: this.data.username.trim().toLowerCase(),
+    email: this.data.email.trim().toLowerCase(),
+    password: this.data.password
+  }
+}
+
+User.prototype.register = async function () {
+  // 1) Validate and clean up user data
+  this.cleanUp()
   this.validate()
 
   // 2) Only if there are no validation errors
   // then save the user data into a database
+  if(!this.errors.length) {
+    let newUser
+    try {
+      newUser = await userCollection.insertOne(this.data)
+    } catch (error) {
+      this.errors.push(`There was a problem registering user in the database.`)
+    }
+
+  }
 }
 
 module.exports = User
