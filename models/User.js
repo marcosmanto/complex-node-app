@@ -69,4 +69,17 @@ User.prototype.register = async function () {
   }
 }
 
+User.prototype.login = function(callback) {
+  this.cleanUp()
+  userCollection.findOne({username: this.data.username},
+    (err, attemptedUser) => {
+      if(attemptedUser && attemptedUser.password === this.data.password) {
+        callback('Congrats 🥳.')
+      } else {
+        callback('Invalid username or password.')
+      }
+    }
+  )
+}
+
 module.exports = User

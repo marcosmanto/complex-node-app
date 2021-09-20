@@ -1,8 +1,9 @@
 const mongodb = require('mongodb')
+const dotenv = require('dotenv')
 
-const connectionString = 'mongodb://127.0.0.1/ComplexApp'
+dotenv.config()
 
-mongodb.MongoClient.connect(connectionString, {useNewUrlParser: true, useUnifiedTopology: true},
+mongodb.MongoClient.connect(process.env.CONNECTIONSTRING, {useNewUrlParser: true, useUnifiedTopology: true},
   (err, client) => {
     if( err && err.stack.toLowerCase().includes('timeout')) {
       console.log('Connection timeout. Check if mongodb server is running.')
@@ -16,6 +17,6 @@ mongodb.MongoClient.connect(connectionString, {useNewUrlParser: true, useUnified
     module.exports = db
 
     const app = require('./app')
-    app.listen(3000)
+    app.listen(process.env.PORT)
   }
 )
