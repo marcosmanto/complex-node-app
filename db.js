@@ -14,7 +14,7 @@ mongodb.MongoClient.connect(process.env.CONNECTIONSTRING, {useNewUrlParser: true
 
     if (db) console.log('Connected to database.')
 
-    module.exports = db
+    module.exports = client
 
     const app = require('./app')
     app.listen(process.env.PORT)
