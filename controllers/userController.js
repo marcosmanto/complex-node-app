@@ -25,7 +25,10 @@ exports.register = async function(req, res) {
   await user.register()
 
   if (user.errors.length) {
-    res.send(user.errors)
+    user.errors.forEach((error) => {
+      req.flash('regErrors', error)
+    })
+    req.session.save(() => res.redirect('/'))
   } else {
     res.send('No validation errors.')
   }
@@ -35,6 +38,6 @@ exports.home = (req, res) => {
   if(req.session.user) {
     res.render('home-dashboard', {username: req.session.user.username})
   } else {
-    res.render('home-guest', {errors: req.flash('errors')})
+    res.render('home-guest', {errors: req.flash('errors'), regErrors: req.flash('regErrors')})
   }
 }
