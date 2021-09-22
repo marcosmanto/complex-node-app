@@ -3,7 +3,7 @@ const User = require("../models/User")
 exports.login = function(req, res) {
   let user = new User(req.body)
   user.login().then(result => {
-    req.session.user = {favColor: 'blue', username: user.data.username}
+    req.session.user = {avatar: user.avatar, username: user.data.username}
     req.session.save(() => res.redirect('/'))
   }).catch(e => {
     // - if error object has errors property send it else sen just error (defaults to message)
@@ -24,7 +24,7 @@ exports.register = async function(req, res) {
 
   try {
     await user.register()
-    req.session.user = {username: user.data.username}
+    req.session.user = {username: user.data.username, avatar: user.avatar}
     req.session.save(() => res.redirect('/'))
   } catch(regErrors) {
     regErrors.forEach((error) => {
@@ -37,7 +37,7 @@ exports.register = async function(req, res) {
 
 exports.home = (req, res) => {
   if(req.session.user) {
-    res.render('home-dashboard', {username: req.session.user.username})
+    res.render('home-dashboard', {username: req.session.user.username, avatar: req.session.user.avatar})
   } else {
     res.render('home-guest', {errors: req.flash('errors'), regErrors: req.flash('regErrors')})
   }

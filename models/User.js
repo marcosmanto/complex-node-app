@@ -1,6 +1,7 @@
 const validator = require('validator')
 const usersCollection = require('../db').db().collection('users')
 const bcrypt = require(`bcryptjs`)
+const md5 = require('md5')
 
 const ACTION = {
   REGISTER: 1,
@@ -108,6 +109,7 @@ User.prototype.register = async function () {
       this.data.password = bcrypt.hashSync(this.data.password, salt)
       try {
         await usersCollection.insertOne(this.data)
+        this.getAvatar()
         resolve()
       } catch (error) {
         this.errors.push(`There was a problem registering user in the database.`)
@@ -128,8 +130,10 @@ User.prototype.login = function() {
     this.validate(ACTION.LOGIN)
     if(this.errors.length) throw new ValidationException(this.errors)
     usersCollection.findOne({username: this.data.username})
-      .then(attemptedUser => {
+      .then((attemptedUser) => {
         if(attemptedUser && bcrypt.compareSync(this.data.password, attemptedUser.password)) {
+          this.data.email = attemptedUser.email
+          this.getAvatar()
           resolve('Congrats 🥳.')
         } else {
           reject('Invalid username or password.')
@@ -137,6 +141,10 @@ User.prototype.login = function() {
       })
       .catch(() => reject('Please try again later.'))
   })
+}
+
+User.prototype.getAvatar = function() {
+  this.avatar = `https://gravatar.com/avatar/${md5(this.data.email)}?s=128`
 }
 
 module.exports = User
