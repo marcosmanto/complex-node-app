@@ -1,4 +1,5 @@
-const User = require("../models/User")
+//const User = require("../models/User")
+const User = require('../models/UserES6')
 
 exports.login = function(req, res) {
   let user = new User(req.body)
