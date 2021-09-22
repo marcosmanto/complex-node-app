@@ -22,17 +22,17 @@ exports.logout = function(req, res) {
 exports.register = async function(req, res) {
   let user = new User(req.body)
 
-  await user.register()
-
-  if (user.errors.length) {
-    user.errors.forEach((error) => {
+  try {
+    await user.register()
+    req.session.user = {username: user.data.username}
+    req.session.save(() => res.redirect('/'))
+  } catch(regErrors) {
+    regErrors.forEach((error) => {
       req.flash('regErrors', error)
     })
     req.session.save(() => res.redirect('/'))
-  } else {
-    req.session.user = {username: user.data.username}
-    req.session.save(() => res.redirect('/'))
   }
+
 }
 
 exports.home = (req, res) => {

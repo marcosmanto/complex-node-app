@@ -94,25 +94,32 @@ User.prototype.cleanUp = function() {
 
 User.prototype.register = async function () {
   // - FUNCTIONS MARKED AS ASYNC IMPLICITLY RETURN A PROMISE.
-  // IN VALIDATE ACTION A PROMISE WAS EXPLICITLY RETURNED.
+  // HERE I'M USING EXPLICIT PROMISE RETURN.
+  return new Promise(async (resolve, reject) => {
 
-  // 1) Validate and clean up user data
-  this.cleanUp()
-  await this.validate(ACTION.REGISTER)
+    // 1) Validate and clean up user data
+    this.cleanUp()
+    await this.validate(ACTION.REGISTER)
 
-  // 2) Only if there are no validation errors
-  // then save the user data into a database
-  if(!this.errors.length) {
-    let newUser
-    let salt = bcrypt.genSaltSync(10)
-    this.data.password = bcrypt.hashSync(this.data.password, salt)
-    try {
-      newUser = await usersCollection.insertOne(this.data)
-    } catch (error) {
-      this.errors.push(`There was a problem registering user in the database.`)
+    // 2) Only if there are no validation errors
+    // then save the user data into a database
+    if(!this.errors.length) {
+      let salt = bcrypt.genSaltSync(10)
+      this.data.password = bcrypt.hashSync(this.data.password, salt)
+      try {
+        await usersCollection.insertOne(this.data)
+        resolve()
+      } catch (error) {
+        this.errors.push(`There was a problem registering user in the database.`)
+        reject(this.errors)
+      }
+    } else {
+      reject(this.errors)
     }
 
-  }
+  })
+
+
 }
 
 User.prototype.login = function() {
