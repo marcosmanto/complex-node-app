@@ -30,7 +30,8 @@ exports.register = async function(req, res) {
     })
     req.session.save(() => res.redirect('/'))
   } else {
-    res.send('No validation errors.')
+    req.session.user = {username: user.data.username}
+    req.session.save(() => res.redirect('/'))
   }
 }
 
