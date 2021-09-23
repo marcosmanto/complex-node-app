@@ -15,17 +15,20 @@ const sessionOptions = session({
   store: MongoStore.create({client: require('./db')})
 })
 
-app.use(sessionOptions)
-
-const router = require('./router')
-app.use(flash())
-
-app.use(express.urlencoded({extended: true}))
-app.use(express.json())
-
-app.use(express.static('public'))
 app.set('views','views')
 app.set('view engine', 'ejs')
+
+app.use(express.static('public'))
+app.use(sessionOptions)
+app.use(flash())
+app.use(express.urlencoded({extended: true}))
+app.use(express.json())
+app.use((req, res, next) => {
+  res.locals.user = req.session.user
+  next()
+})
+
+const router = require('./router')
 app.use('/', router)
 
 module.exports = app
