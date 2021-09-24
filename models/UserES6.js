@@ -101,8 +101,9 @@ class UserES6 {
         let salt = bcrypt.genSaltSync(10)
         this.data.password = bcrypt.hashSync(this.data.password, salt)
         try {
-          await usersCollection.insertOne(this.data)
+          let newUser = await usersCollection.insertOne(this.data)
           this.getAvatar()
+          this.data._id = newUser.insertedId.toString()
           resolve()
         } catch (error) {
           this.errors.push(`There was a problem registering user in the database.`)
@@ -124,6 +125,7 @@ class UserES6 {
         .then(attemptedUser => {
           if(attemptedUser && bcrypt.compareSync(this.data.password, attemptedUser.password)) {
             this.data.email = attemptedUser.email
+            this.data._id = attemptedUser._id
             this.getAvatar()
             resolve('Congrats 🥳.')
           } else {

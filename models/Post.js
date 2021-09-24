@@ -1,12 +1,15 @@
 const { cleanObject } = require("../modules/Utils")
 const postsCollection = require('../db').db().collection('posts')
+const { ObjectId } = require("bson")
+
 class Post {
   #allowedFields = ['title', 'body']
-  #transformations = [onlyString, lower]
+  #transformations = [onlyString, trimVal]
 
-  constructor(data) {
+  constructor(data, userid) {
     this.data = data
     this.errors = []
+    this.userid = userid
   }
 
   cleanUp() {
@@ -37,6 +40,7 @@ class Post {
       this.validate()
       if(!this.errors.length) {
         this.data.createDate = new Date()
+        this.data.author = ObjectId(this.userid)
         // save post into database
         postsCollection.insertOne(this.data)
           .then(() => {
@@ -60,6 +64,10 @@ function onlyString(val) {
 
 function lower(val) {
   return typeof val === 'string' ? val.toLowerCase() : val
+}
+
+function trimVal(val) {
+  return typeof val === 'string' ? val.trim() : val
 }
 
 module.exports = Post
