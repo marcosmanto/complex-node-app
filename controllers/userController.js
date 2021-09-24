@@ -49,6 +49,13 @@ exports.home = (req, res) => {
   if(req.session.user) {
     res.render('home-dashboard')
   } else {
-    res.render('home-guest', {errors: req.flash('errors'), regErrors: req.flash('regErrors')})
+    res.render('home-guest', {
+      // Only pass flash messages if flash was initialized and populated
+      // Without this check session is saved to database when user gets to the home page
+      errors: req.session.flash !== undefined ? req.flash('errors') : [],
+      regErrors: req.session.flash !== undefined ? req.flash('regErrors') : []
+    })
+    if(req.session.flash)
+      req.session.destroy()
   }
 }
