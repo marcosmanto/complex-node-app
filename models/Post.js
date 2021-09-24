@@ -1,6 +1,7 @@
 const { cleanObject } = require("../modules/Utils")
 const postsCollection = require('../db').db().collection('posts')
 const { ObjectId } = require("bson")
+const UserES6 = require("./UserES6")
 
 class Post {
   #allowedFields = ['title', 'body']
@@ -19,14 +20,29 @@ class Post {
         reject()
         return
       }
-      let post = await postsCollection.findOne({_id: new ObjectId(id)})
-      if(post) {
-        resolve(post)
+      let posts = await postsCollection.aggregate([
+        {$match: {_id: new ObjectId(id)}},
+        {$lookup: {from: 'users', localField: 'author', foreignField: '_id', as: 'authorDocument'}},
+        {$project: {
+          title: 1,
+          body: 1,
+          createdDate: 1,
+          author: {$arrayElemAt: ['$authorDocument', 0]}
+        }}
+      ]).toArray()
+
+      posts = posts.map(post => {
+        post.author = cleanObject(post.author, ['username', 'email'])
+        post.author.avatar = UserES6.getAvatar(post.author.email)
+        return post
+      })
+
+      if(posts.length) {
+        resolve(posts.pop())
       } else {
         reject()
       }
     })
-
   }
 
   // Instance methods
@@ -43,7 +59,7 @@ class Post {
     this.data = {
       title: this.data.title,
       body: this.data.body,
-      createDate: new Date()
+      createdDate: new Date()
     }
   }
 
@@ -57,8 +73,8 @@ class Post {
       this.cleanUp()
       this.validate()
       if(!this.errors.length) {
-        this.data.createDate = new Date()
-        this.data.author = ObjectId(this.userid)
+        this.data.createdDate = new Date()
+        this.data.author = new ObjectId(this.userid)
         // save post into database
         postsCollection.insertOne(this.data)
           .then(() => {

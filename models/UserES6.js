@@ -16,6 +16,10 @@ class UserES6 {
     Object.freeze(this.constructor.ACTION);
   }
 
+  static getAvatar(email) {
+   return `https://gravatar.com/avatar/${md5(email)}?s=128`
+  }
+
   validate(action) {
     return new Promise(
       async (resolve, reject) => {
@@ -137,7 +141,7 @@ class UserES6 {
   }
 
   getAvatar() {
-    this.avatar = `https://gravatar.com/avatar/${md5(this.data.email)}?s=128`
+    this.avatar = this.constructor.getAvatar(this.data.email) //same as UserES6.getAvatar(this.data.email)
   }
 
 }
