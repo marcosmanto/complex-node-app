@@ -12,6 +12,24 @@ class Post {
     this.userid = userid
   }
 
+  // Static methods
+  static findSingleById(id) {
+    return new Promise(async (resolve, reject) => {
+      if(typeof(id) !== 'string' || !ObjectId.isValid(id)) {
+        reject()
+        return
+      }
+      let post = await postsCollection.findOne({_id: new ObjectId(id)})
+      if(post) {
+        resolve(post)
+      } else {
+        reject()
+      }
+    })
+
+  }
+
+  // Instance methods
   cleanUp() {
     this.data = cleanObject(this.data, this.#allowedFields, this.#transformations)
     console.log(`post data cleaned`)

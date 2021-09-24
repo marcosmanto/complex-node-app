@@ -10,3 +10,13 @@ exports.create = function(req, res) {
     .then(() => res.json(post.data))
     .catch(errors => res.send(errors))
 }
+
+exports.viewSingle = async function(req, res) {
+  try {
+    let post = await Post.findSingleById(req.params.id)
+    res.render('single-post-screen', { post })
+  } catch {
+    res.send('404 💣💥')
+  }
+
+}
