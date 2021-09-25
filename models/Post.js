@@ -14,14 +14,17 @@ class Post {
   }
 
   // Static methods
-  static findSingleById(id) {
+
+  static findByAuthorId(authorId) {
+    return Post.reusablePostQuery([
+      {$match: {author: authorId}},
+      {$sort: {createdDate: -1}}
+    ])
+  }
+
+  static reusablePostQuery(uniqueOperations) {
     return new Promise(async (resolve, reject) => {
-      if(typeof(id) !== 'string' || !ObjectId.isValid(id)) {
-        reject()
-        return
-      }
-      let posts = await postsCollection.aggregate([
-        {$match: {_id: new ObjectId(id)}},
+      let aggOperations = uniqueOperations.concat([
         {$lookup: {from: 'users', localField: 'author', foreignField: '_id', as: 'authorDocument'}},
         {$project: {
           title: 1,
@@ -29,13 +32,29 @@ class Post {
           createdDate: 1,
           author: {$arrayElemAt: ['$authorDocument', 0]}
         }}
-      ]).toArray()
+      ])
+      let posts = await postsCollection.aggregate(aggOperations).toArray()
 
       posts = posts.map(post => {
         post.author = cleanObject(post.author, ['username', 'email'])
         post.author.avatar = UserES6.getAvatar(post.author.email)
         return post
       })
+
+      resolve(posts)
+    })
+  }
+
+  static findSingleById(id) {
+    return new Promise(async (resolve, reject) => {
+      if(typeof(id) !== 'string' || !ObjectId.isValid(id)) {
+        reject()
+        return
+      }
+
+      let posts = await Post.reusablePostQuery([
+        {$match: {_id: new ObjectId(id)}}
+      ])
 
       if(posts.length) {
         resolve(posts.pop())
