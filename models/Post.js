@@ -22,7 +22,7 @@ class Post {
     ])
   }
 
-  static reusablePostQuery(uniqueOperations) {
+  static reusablePostQuery(uniqueOperations, visitorId) {
     return new Promise(async (resolve, reject) => {
       let aggOperations = uniqueOperations.concat([
         {$lookup: {from: 'users', localField: 'author', foreignField: '_id', as: 'authorDocument'}},
@@ -30,12 +30,14 @@ class Post {
           title: 1,
           body: 1,
           createdDate: 1,
+          authorId: '$author',
           author: {$arrayElemAt: ['$authorDocument', 0]}
         }}
       ])
       let posts = await postsCollection.aggregate(aggOperations).toArray()
 
       posts = posts.map(post => {
+        post.isVisitorOwner = post.authorId.equals(visitorId)
         post.author = cleanObject(post.author, ['username', 'email'])
         post.author.avatar = UserES6.getAvatar(post.author.email)
         return post
@@ -45,7 +47,7 @@ class Post {
     })
   }
 
-  static findSingleById(id) {
+  static findSingleById(id, visitorId) {
     return new Promise(async (resolve, reject) => {
       if(typeof(id) !== 'string' || !ObjectId.isValid(id)) {
         reject()
@@ -54,7 +56,7 @@ class Post {
 
       let posts = await Post.reusablePostQuery([
         {$match: {_id: new ObjectId(id)}}
-      ])
+      ], visitorId)
 
       if(posts.length) {
         resolve(posts.pop())
