@@ -2,6 +2,7 @@ const validator = require('validator')
 const usersCollection = require('../db').db().collection('users')
 const bcrypt = require(`bcryptjs`)
 const md5 = require('md5')
+const { cleanObject } = require('../modules/Utils')
 
 class UserES6 {
 
@@ -16,8 +17,29 @@ class UserES6 {
     Object.freeze(this.constructor.ACTION);
   }
 
+  // static class methods
   static getAvatar(email) {
    return `https://gravatar.com/avatar/${md5(email)}?s=128`
+  }
+
+  static async findByUsername(username) {
+    return new Promise((resolve, reject) => {
+      if(typeof(username) !== 'string') {
+        reject()
+        return
+      }
+      usersCollection.findOne({username}).then(function(userDoc) {
+        if(userDoc) {
+          userDoc.avatar = UserES6.getAvatar(userDoc.email)
+          userDoc = cleanObject(userDoc, ['_id', 'username', 'avatar'])
+          resolve(userDoc)
+        } else {
+          reject()
+        }
+      }).catch(function() {
+        reject()
+      })
+    })
   }
 
   validate(action) {
