@@ -24,6 +24,10 @@ app.use(flash())
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
 app.use((req, res, next) => {
+  //make all error ans success flash messages available from all views
+  res.locals.errors = req.session.flash !== undefined ? req.flash('errors') : []
+  res.locals.success = req.session.flash !== undefined ? req.flash('success') : []
+
   // make current user id available on the req object
   if(req.session.user) {
     req.visitorId = req.session.user._id

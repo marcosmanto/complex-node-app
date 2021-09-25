@@ -53,7 +53,7 @@ exports.home = (req, res) => {
     res.render('home-guest', {
       // Only pass flash messages if flash was initialized and populated
       // Without this check session is saved to database when user gets to the home page
-      errors: req.session.flash !== undefined ? req.flash('errors') : [],
+      //errors: req.session.flash !== undefined ? req.flash('errors') : [],
       regErrors: req.session.flash !== undefined ? req.flash('regErrors') : []
     })
     if(req.session.flash)

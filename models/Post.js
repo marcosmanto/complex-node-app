@@ -7,10 +7,11 @@ class Post {
   #allowedFields = ['title', 'body']
   #transformations = [onlyString, trimVal]
 
-  constructor(data, userid) {
+  constructor(data, userid, requestedPostId) {
     this.data = data
     this.errors = []
     this.userid = userid
+    this.requestedPostId = requestedPostId
   }
 
   // Static methods
@@ -111,7 +112,37 @@ class Post {
     })
   }
 
+  async updateInDatabase() {
+      this.cleanUp()
+      this.validate()
+      if(!this.errors.length) {
+        await postsCollection.findOneAndUpdate(
+          {_id: new ObjectId(this.requestedPostId)},
+          {$set: {title: this.data.title, body: this.data.body}}
+        )
+      }
+  }
+
+  update() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let post = await Post.findSingleById(this.requestedPostId, this.userid)
+        if(post.isVisitorOwner) {
+          // owner of the post safelly update post
+          await this.updateInDatabase()
+          resolve(this)
+        } else {
+          reject()
+        }
+      } catch {
+        reject()
+      }
+    })
+  }
+
 }
+
+
 
 function onlyString(val) {
   return typeof val !== 'string' ? '' : val
