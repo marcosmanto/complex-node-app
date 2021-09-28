@@ -62,3 +62,17 @@ exports.edit = async function(req, res) {
     req.session.save(() => res.redirect('/'))
   }
 }
+
+exports.delete = async function(req, res) {
+  let post = new Post(undefined, req.visitorId, req.params.id)
+  try {
+    await post.delete()
+    req.flash('success', 'Post successfully deleted.')
+    req.session.save(() => res.redirect(`/profile/${req.session.user.username}`))
+  } catch(error) {
+    // post with the requested id doesn't exist
+    // or if the current visitor is not the owner of the requested post
+    req.flash('errors', error)
+    req.session.save(() => res.redirect('/'))
+  }
+}

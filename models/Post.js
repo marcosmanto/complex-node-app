@@ -113,6 +113,23 @@ class Post {
     })
   }
 
+  async delete() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let post = await Post.findSingleById(this.requestedPostId, this.userid)
+        if(post.isVisitorOwner) {
+          // owner of the post safelly update post
+          await postsCollection.deleteOne({_id: post._id})
+          resolve(this)
+        } else {
+          reject('You do not have permission to perform that action.')
+        }
+      } catch {
+        reject('Post not found.')
+      }
+    })
+  }
+
   async updateInDatabase() {
       this.cleanUp()
       this.validate()
