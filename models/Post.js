@@ -2,10 +2,11 @@ const { cleanObject } = require("../modules/Utils")
 const postsCollection = require('../db').db().collection('posts')
 const { ObjectId } = require("bson")
 const UserES6 = require("./UserES6")
+const sanitizeHTML = require('sanitize-html')
 
 class Post {
   #allowedFields = ['title', 'body']
-  #transformations = [onlyString, trimVal]
+  #transformations = [onlyString, trimVal, sanitizeVal]
 
   constructor(data, userid, requestedPostId) {
     this.data = data
@@ -99,8 +100,8 @@ class Post {
         this.data.author = new ObjectId(this.userid)
         // save post into database
         postsCollection.insertOne(this.data)
-          .then(() => {
-            resolve()
+          .then(info => {
+            resolve(info.insertedId.toString())
           })
           .catch(() => {
             this.errors.push('Please try again later.')
@@ -154,6 +155,10 @@ function lower(val) {
 
 function trimVal(val) {
   return typeof val === 'string' ? val.trim() : val
+}
+
+function sanitizeVal(val) {
+  return sanitizeHTML(val, {allowedTags: [], allowedAttributes: {}})
 }
 
 module.exports = Post
