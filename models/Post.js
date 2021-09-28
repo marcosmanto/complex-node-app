@@ -17,13 +17,6 @@ class Post {
 
   // Static methods
 
-  static findByAuthorId(authorId) {
-    return Post.reusablePostQuery([
-      {$match: {author: authorId}},
-      {$sort: {createdDate: -1}}
-    ])
-  }
-
   static reusablePostQuery(uniqueOperations, visitorId) {
     return new Promise(async (resolve, reject) => {
       let aggOperations = uniqueOperations.concat([
@@ -47,6 +40,13 @@ class Post {
 
       resolve(posts)
     })
+  }
+
+  static findByAuthorId(authorId) {
+    return Post.reusablePostQuery([
+      {$match: {author: authorId}},
+      {$sort: {createdDate: -1}}
+    ])
   }
 
   static findSingleById(id, visitorId) {
