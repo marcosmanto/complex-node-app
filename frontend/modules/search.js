@@ -1,3 +1,4 @@
+import axios from 'axios'
 export default class Search {
 
   // DOM elements and useful data
@@ -6,11 +7,19 @@ export default class Search {
     this.headerSearchIcon = document.querySelector('.header-search-icon')
     this.overlay = document.querySelector('.search-overlay')
     this.closeIcon = document.querySelector('.close-live-search')
+    this.inputField = document.querySelector('#live-search-field')
+    this.resultsArea = document.querySelector('.live-search-results')
+    this.loaderIcon = document.querySelector('.circle-loader')
+    this.typingWaitTimer
+    this.previousValue = ''
     this.events()
   }
 
   // Events
   events() {
+    this.inputField.addEventListener('keyup', () => {
+      this.keyPressHandler()
+    })
     this.closeIcon.addEventListener('click', evt => {
       evt.preventDefault()
       this.overlay.classList.remove('search-overlay--visible')
@@ -22,8 +31,36 @@ export default class Search {
   }
 
   // Methods
+
+  keyPressHandler() {
+    let value = this.inputField.value
+    if (value !== '' && value !== this.previousValue) {
+      clearTimeout(this.typingWaitTimer)
+      this.showLoaderIcon()
+      this.typingWaitTimer = setTimeout(() => {
+        this.sendRequest()
+      }, 3000);
+    }
+    this.previousValue = value
+  }
+
+  sendRequest() {
+    axios.post('/search', {searchTerm: this.inputField.value})
+      .then(() => {
+        return
+      })
+      .catch(() => {
+        alert('Request failed 💥')
+      })
+  }
+
+  showLoaderIcon() {
+    this.loaderIcon.classList.add('circle-loader--visible')
+  }
+
   openOverlay() {
     this.overlay.classList.add('search-overlay--visible')
+    setTimeout(() => this.inputField.focus(), 50)
   }
 
   injectHTML() {
@@ -39,7 +76,7 @@ export default class Search {
     <div class="search-overlay-bottom">
       <div class="container container--narrow py-3">
         <div class="circle-loader"></div>
-        <div class="live-search-results live-search-results--visible">
+        <div class="live-search-results">
           <div class="list-group shadow-sm">
             <div class="list-group-item active"><strong>Search Results</strong> (4 items found)</div>
 
