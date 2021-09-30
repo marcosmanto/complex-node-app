@@ -46,8 +46,8 @@ export default class Search {
 
   sendRequest() {
     axios.post('/search', {searchTerm: this.inputField.value})
-      .then(() => {
-        return
+      .then(response => {
+        console.log(response.data)
       })
       .catch(() => {
         alert('Request failed 💥')

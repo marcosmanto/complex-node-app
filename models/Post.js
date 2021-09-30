@@ -17,7 +17,20 @@ class Post {
 
   // Static methods
 
-  static reusablePostQuery(uniqueOperations, visitorId) {
+  static search(searchTerm) {
+    return new Promise(async (resolve, reject) => {
+      if(typeof(searchTerm) === 'string') {
+        let posts = await Post.reusablePostQuery([
+          {$match: {$text: {$search: searchTerm}}}
+        ], undefined, [{$sort: {score: {$meta: 'textScore'}}}])
+        resolve(posts)
+      } else {
+        reject()
+      }
+    })
+  }
+
+  static reusablePostQuery(uniqueOperations, visitorId, finalOperations = []) {
     return new Promise(async (resolve, reject) => {
       let aggOperations = uniqueOperations.concat([
         {$lookup: {from: 'users', localField: 'author', foreignField: '_id', as: 'authorDocument'}},
@@ -28,11 +41,13 @@ class Post {
           authorId: '$author',
           author: {$arrayElemAt: ['$authorDocument', 0]}
         }}
-      ])
+      ]).concat(finalOperations)
+
       let posts = await postsCollection.aggregate(aggOperations).toArray()
 
       posts = posts.map(post => {
         post.isVisitorOwner = post.authorId.equals(visitorId)
+        post.authorId = undefined
         post.author = cleanObject(post.author, ['username', 'email'])
         post.author.avatar = UserES6.getAvatar(post.author.email)
         return post
