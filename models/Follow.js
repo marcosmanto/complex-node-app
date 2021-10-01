@@ -1,4 +1,5 @@
 const { ObjectID } = require('bson')
+const UserES6 = require('./UserES6')
 const usersCollection = require('../db').db().collection('users')
 const followsCollection = require('../db').db().collection('follows')
 
@@ -15,6 +16,25 @@ class Follow {
   static async isVisitorFollowing(followedId, visitorId) {
     let followDoc = await followsCollection.findOne({followedId, authorId: new ObjectID(visitorId)})
     return followDoc ? true : false
+  }
+
+  static async getFollowersById(userId) {
+    try {
+      let followers = await followsCollection.aggregate([
+        {$match: {followedId: userId}},
+        {$lookup: {from: 'users', localField: 'authorId', foreignField: '_id', as: 'userDoc'}},
+        {$project: {
+          username: {$arrayElemAt: ['$userDoc.username', 0]},
+          email: {$arrayElemAt: ['$userDoc.email', 0]},
+        }}
+      ]).toArray()
+      followers = followers.map(follower => {
+        return { username: follower.username, avatar: UserES6.getAvatar(follower.email) }
+      })
+      return followers
+    } catch {
+      throw new Error('Failed to get followers.')
+    }
   }
 
   cleanUp() {

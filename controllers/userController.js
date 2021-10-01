@@ -85,6 +85,20 @@ exports.profilePostsScreen = function(req, res) {
   })
 }
 
+exports.profileFollowersScreen = async function(req, res) {
+  try {
+    const followers = await Follow.getFollowersById(req.profileUser._id)
+    res.render('profile-followers', {
+      followers,
+      profileUsername: req.profileUser.username,
+      profileAvatar: req.profileUser.avatar,
+      isFollowing: req.isFollowing
+    })
+  } catch {
+    res.render('404')
+  }
+}
+
 exports.sharedProfileData = async function(req, res, next) {
   let isFollowing = false
   if(req.session.user) {
