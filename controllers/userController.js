@@ -1,6 +1,7 @@
 //const User = require("../models/User")
 const Post = require('../models/Post')
 const User = require('../models/UserES6')
+const Follow = require('../models/Follow')
 
 exports.mustBeLoggedIn = function(req, res, next) {
   if(req.session.user) {
@@ -76,11 +77,21 @@ exports.profilePostsScreen = function(req, res) {
     res.render('profile', {
       profileUsername: req.profileUser.username,
       profileAvatar: req.profileUser.avatar,
-      posts
+      posts,
+      isFollowing: req.isFollowing
     })
   }).catch(() => {
     res.render('404')
   })
+}
 
+exports.sharedProfileData = async function(req, res, next) {
+  let isFollowing = false
+  if(req.session.user) {
+    // is current user following this profile account? Ask database.
+    isFollowing = await Follow.isVisitorFollowing(req.profileUser._id, req.visitorId)
+  }
 
+  req.isFollowing = isFollowing
+  next()
 }
