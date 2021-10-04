@@ -1,5 +1,6 @@
 const { cleanObject } = require("../modules/Utils")
 const postsCollection = require('../db').db().collection('posts')
+const followsCollection = require('../db').db().collection('follows')
 const { ObjectId } = require("bson")
 const UserES6 = require("./UserES6")
 const sanitizeHTML = require('sanitize-html')
@@ -16,6 +17,18 @@ class Post {
   }
 
   // Static methods
+
+  static async getFeed(id) {
+    // create an array of the users ids that current user follow
+    let followedUsers = await followsCollection.find({authorId: new ObjectId(id)}).toArray()
+    followedUsers = followedUsers.map(followDoc => followDoc.followedId)
+
+    // look for posts where the author is in the above array of followed users
+    return Post.reusablePostQuery([
+      {$match: {author: {$in: followedUsers}}},
+      {$sort: {createdDate: -1}}
+    ])
+  }
 
   static search(searchTerm) {
     return new Promise(async (resolve, reject) => {

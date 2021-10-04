@@ -47,9 +47,11 @@ exports.register = async function(req, res) {
 
 }
 
-exports.home = (req, res) => {
+exports.home = async (req, res) => {
   if(req.session.user) {
-    res.render('home-dashboard')
+    // fetch feed of posts for current user
+    const posts = await Post.getFeed(req.session.user._id)
+    res.render('home-dashboard', {posts})
   } else {
     res.render('home-guest', {
       // Only pass flash messages if flash was initialized and populated
