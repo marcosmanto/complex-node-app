@@ -18,10 +18,10 @@ class Follow {
     return followDoc ? true : false
   }
 
-  static async getFollowersById(userId) {
+  static async getFollowersById(profileUserId) {
     try {
       let followers = await followsCollection.aggregate([
-        {$match: {followedId: userId}},
+        {$match: {followedId: profileUserId}},
         {$lookup: {from: 'users', localField: 'authorId', foreignField: '_id', as: 'userDoc'}},
         {$project: {
           username: {$arrayElemAt: ['$userDoc.username', 0]},
@@ -34,6 +34,43 @@ class Follow {
       return followers
     } catch {
       throw new Error('Failed to get followers.')
+    }
+  }
+
+  static async getFollowingById(profileUserId) {
+    try {
+      let followings = await followsCollection.aggregate([
+        {$match: {authorId: profileUserId}},
+        {$lookup: {from: 'users', localField: 'followedId', foreignField: '_id', as: 'userDoc'}},
+        {$project: {
+          username: {$arrayElemAt: ['$userDoc.username', 0]},
+          email: {$arrayElemAt: ['$userDoc.email', 0]},
+        }}
+      ]).toArray()
+      followings = followings.map(following => {
+        return { username: following.username, avatar: UserES6.getAvatar(following.email) }
+      })
+      // in async function return is equivalent to resolve(followings) in return new Promise(...) version
+      return followings
+    } catch {
+      // in async function throwing an error is equivalent to reject('message') in return new Promise(...) version
+      throw new Error('Failed to get followings.')
+    }
+  }
+
+  static async countFollowersById(id) {
+    try {
+      return await followsCollection.countDocuments({followedId: id})
+    } catch {
+      throw new Error('Failed to get followers count.')
+    }
+  }
+
+  static async countFollowingById(id) {
+    try {
+      return await followsCollection.countDocuments({authorId: id})
+    } catch {
+      throw new Error('Failed to get followings count.')
     }
   }
 

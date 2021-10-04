@@ -75,10 +75,12 @@ exports.profilePostsScreen = function(req, res) {
   // get all posts from user
   Post.findByAuthorId(req.profileUser._id).then((posts) => {
     res.render('profile', {
+      currentPage: 'profile',
       profileUsername: req.profileUser.username,
       profileAvatar: req.profileUser.avatar,
       posts,
-      isFollowing: req.isFollowing
+      isFollowing: req.isFollowing,
+      counts: {postCount: req.postCount, followerCount: req.followerCount, followingCount: req.followingCount}
     })
   }).catch(() => {
     res.render('404')
@@ -89,10 +91,28 @@ exports.profileFollowersScreen = async function(req, res) {
   try {
     const followers = await Follow.getFollowersById(req.profileUser._id)
     res.render('profile-followers', {
+      currentPage: 'profile-followers',
       followers,
       profileUsername: req.profileUser.username,
       profileAvatar: req.profileUser.avatar,
-      isFollowing: req.isFollowing
+      isFollowing: req.isFollowing,
+      counts: {postCount: req.postCount, followerCount: req.followerCount, followingCount: req.followingCount}
+    })
+  } catch {
+    res.render('404')
+  }
+}
+
+exports.profileFollowingScreen = async function(req, res) {
+  try {
+    const following = await Follow.getFollowingById(req.profileUser._id)
+    res.render('profile-following', {
+      currentPage: 'profile-following',
+      following,
+      profileUsername: req.profileUser.username,
+      profileAvatar: req.profileUser.avatar,
+      isFollowing: req.isFollowing,
+      counts: {postCount: req.postCount, followerCount: req.followerCount, followingCount: req.followingCount}
     })
   } catch {
     res.render('404')
@@ -107,5 +127,16 @@ exports.sharedProfileData = async function(req, res, next) {
   }
 
   req.isFollowing = isFollowing
+  // retrieve post, follower and following counts
+  const postCountPromise = Post.countPostsByAuthor(req.profileUser._id)
+  const followerCountPromise = Follow.countFollowersById(req.profileUser._id)
+  const followingCountPromise = Follow.countFollowingById(req.profileUser._id)
+
+  const [postCount, followerCount, followingCount] = await Promise.all([postCountPromise, followerCountPromise, followingCountPromise])
+
+  req.postCount = postCount
+  req.followerCount = followerCount
+  req.followingCount = followingCount
+
   next()
 }

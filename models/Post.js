@@ -57,6 +57,14 @@ class Post {
     })
   }
 
+  static async countPostsByAuthor(id) {
+    try {
+      return await postsCollection.countDocuments({author: id})
+    } catch {
+      throw new Error('Failed to get posts count.')
+    }
+  }
+
   static findByAuthorId(authorId) {
     return Post.reusablePostQuery([
       {$match: {author: authorId}},
