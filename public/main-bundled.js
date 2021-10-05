@@ -2196,6 +2196,75 @@ var Chat = /*#__PURE__*/function () {
 
 /***/ }),
 
+/***/ "./frontend/modules/registrationForm.js":
+/*!**********************************************!*\
+  !*** ./frontend/modules/registrationForm.js ***!
+  \**********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ RegistrationForm)
+/* harmony export */ });
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var RegistrationForm = /*#__PURE__*/function () {
+  function RegistrationForm() {
+    _classCallCheck(this, RegistrationForm);
+
+    this.allFields = document.querySelectorAll('#registration-form .form-control');
+    this.insertValidationElements();
+    this.username = document.querySelector('#username-register');
+    this.username.previousValue = '';
+    this.events();
+  } // Events
+
+
+  _createClass(RegistrationForm, [{
+    key: "events",
+    value: function events() {
+      var _this = this;
+
+      this.username.addEventListener('keyup', function (el) {
+        _this.isDifferent(_this.username, _this.usernameHandler);
+      });
+    } // Methods
+
+  }, {
+    key: "isDifferent",
+    value: function isDifferent(el, handler) {
+      if (el.previousValue !== el.value) {
+        handler.call(this);
+      }
+
+      el.previousValue = el.value;
+    }
+  }, {
+    key: "usernameHandler",
+    value: function usernameHandler() {
+      alert('username handler');
+    }
+  }, {
+    key: "insertValidationElements",
+    value: function insertValidationElements() {
+      this.allFields.forEach(function (el) {
+        el.insertAdjacentHTML('afterend', '<div class="alert alert-danger small liveValidateMessage"></div>');
+      });
+    }
+  }]);
+
+  return RegistrationForm;
+}();
+
+
+
+/***/ }),
+
 /***/ "./frontend/modules/search.js":
 /*!************************************!*\
   !*** ./frontend/modules/search.js ***!
@@ -3855,8 +3924,14 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_search__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./modules/search */ "./frontend/modules/search.js");
 /* harmony import */ var _modules_chat__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modules/chat */ "./frontend/modules/chat.js");
+/* harmony import */ var _modules_registrationForm__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modules/registrationForm */ "./frontend/modules/registrationForm.js");
 
 
+
+
+if (document.querySelector('#registration-form')) {
+  new _modules_registrationForm__WEBPACK_IMPORTED_MODULE_2__["default"]();
+}
 
 if (document.querySelector('#chat-wrapper')) {
   new _modules_chat__WEBPACK_IMPORTED_MODULE_1__["default"]();
