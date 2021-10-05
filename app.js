@@ -59,10 +59,16 @@ io.use(function(socket, next) {
 io.on('connection', (socket) => {
   // only accepts socket messages if user is logged in
   if(socket.request.session.user) {
-    const user = socket.request.session.user
-    socket.on('chatMessageFromBrowser', (data) => {
+    let user = socket.request.session.user
+
+    // emit only once when a connection is established
+    // send back to the client information about user session data (username and avatar)
+    socket.emit('welcome', {username: user.username, avatar: user.avatar})
+
+    socket.on('chatMessageFromBrowser', data => {
       // socket.emit send data only to this connection, io.emit send to all active connections
-      io.emit('chatMessageFromServer', {message: data.message, username: user.username, avatar: user.avatar})
+      // socket.broadcast.emit send to all connections except the message sender
+      socket.broadcast.emit('chatMessageFromServer', {message: sanitizeHTML(data.message, {allowedTags: [], allowedAttributes: {}}), username: user.username, avatar: user.avatar})
     })
   }
 })
