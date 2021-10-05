@@ -2231,6 +2231,7 @@ var RegistrationForm = /*#__PURE__*/function () {
       var _this = this;
 
       this.username.addEventListener('keyup', function (el) {
+        // filter only keystrokes that represent changes in the typed string
         _this.isDifferent(_this.username, _this.usernameHandler);
       });
     } // Methods
@@ -2247,7 +2248,49 @@ var RegistrationForm = /*#__PURE__*/function () {
   }, {
     key: "usernameHandler",
     value: function usernameHandler() {
-      alert('username handler');
+      var _this2 = this;
+
+      this.username.errors = false;
+      this.usernameImmediately();
+      clearTimeout(this.username.timer);
+      this.username.timer = setTimeout(function () {
+        return _this2.usernameAfterDelay();
+      }, 3000);
+    }
+  }, {
+    key: "usernameImmediately",
+    value: function usernameImmediately() {
+      // username is not empty AND is not alphanumeric
+      if (this.username.value !== '' && !/^([a-zA-Z0-9]+)$/.test(this.username.value)) {
+        this.showValidationError(this.username, 'Username can only contain letters and numbers.');
+      }
+
+      if (this.username.value.length > 30) {
+        this.showValidationError(this.username, 'Username cannot exceed 30 characters.');
+      }
+
+      if (!this.username.errors) {
+        this.hideValidationError(this.username);
+      }
+    }
+  }, {
+    key: "usernameAfterDelay",
+    value: function usernameAfterDelay() {
+      if (this.username.value.length < 3) {
+        this.showValidationError(this.username, 'Username must be at least 3 characters.');
+      }
+    }
+  }, {
+    key: "showValidationError",
+    value: function showValidationError(el, message) {
+      el.nextElementSibling.innerHTML = message;
+      el.nextElementSibling.classList.add('liveValidateMessage--visible');
+      el.errors = true;
+    }
+  }, {
+    key: "hideValidationError",
+    value: function hideValidationError(el) {
+      el.nextElementSibling.classList.remove('liveValidateMessage--visible');
     }
   }, {
     key: "insertValidationElements",
