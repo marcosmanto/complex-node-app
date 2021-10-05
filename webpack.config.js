@@ -6,7 +6,8 @@ module.exports = {
     filename: 'main-bundled.js',
     path: path.resolve(__dirname, 'public')
   },
-  mode: "production",
+  devtool: 'source-map',
+  mode: "development",
   module: {
     rules: [
       {
