@@ -77,6 +77,7 @@ exports.profilePostsScreen = function(req, res) {
   // get all posts from user
   Post.findByAuthorId(req.profileUser._id).then((posts) => {
     res.render('profile', {
+      title: `Profile for ${req.profileUser.username}`,
       currentPage: 'profile',
       profileUsername: req.profileUser.username,
       profileAvatar: req.profileUser.avatar,
