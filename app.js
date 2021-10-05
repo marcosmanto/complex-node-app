@@ -48,4 +48,15 @@ app.use((req, res, next) => {
 const router = require('./router')
 app.use('/', router)
 
-module.exports = app
+const server = require('http').createServer(app)
+
+const io = require('socket.io')(server)
+
+io.on('connection', (socket) => {
+  socket.on('chatMessageFromBrowser', (data) => {
+    // socket.emit send data only to this connection, io.emit send to all active connections
+    io.emit('chatMessageFromServer', {message: data.message})
+  })
+})
+
+module.exports = server
