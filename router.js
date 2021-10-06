@@ -32,6 +32,8 @@ router.get('/post/:id/edit', userController.mustBeLoggedIn, postController.viewE
 router.post('/post/:id/edit', userController.mustBeLoggedIn, postController.edit)
 router.post('/post/:id/delete', userController.mustBeLoggedIn, postController.delete)
 router.post('/search', postController.search)
+router.post('/doesUsernameExist', userController.doesUsernameExist)
+router.post('/doesEmailExist', userController.doesEmailExist)
 
 // follow related routes
 router.post('/addFollow/:username', userController.mustBeLoggedIn , followController.addFollow)

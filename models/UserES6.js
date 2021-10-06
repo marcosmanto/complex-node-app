@@ -22,6 +22,18 @@ class UserES6 {
    return `https://gravatar.com/avatar/${md5(email)}?s=128`
   }
 
+  static async doesEmailExist(email) {
+    if(typeof(email) !== 'string') {
+      throw new Error('Please try again. 💥')
+    }
+    try {
+      const user = await usersCollection.findOne({email})
+      return user ? true : false
+    } catch {
+      return false
+    }
+  }
+
   static async findByUsername(username) {
     return new Promise((resolve, reject) => {
       if(typeof(username) !== 'string') {

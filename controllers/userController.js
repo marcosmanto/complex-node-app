@@ -3,6 +3,21 @@ const Post = require('../models/Post')
 const User = require('../models/UserES6')
 const Follow = require('../models/Follow')
 
+exports.doesUsernameExist = function(req, res) {
+  User.findByUsername(req.body.username)
+    .then(() => res.json(true))
+    .catch(() => res.json(false))
+}
+
+exports.doesEmailExist = async function(req, res) {
+  try {
+    const emailExist = await User.doesEmailExist(req.body.email)
+    res.json(emailExist)
+  } catch(error) {
+    res.json({error: error.message})
+  }
+}
+
 exports.mustBeLoggedIn = function(req, res, next) {
   if(req.session.user) {
     next()
