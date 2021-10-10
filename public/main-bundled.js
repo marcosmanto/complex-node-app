@@ -2233,6 +2233,7 @@ var RegistrationForm = /*#__PURE__*/function () {
   function RegistrationForm() {
     (0,_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_1__["default"])(this, RegistrationForm);
 
+    this._csrf = document.querySelector('[name="_csrf"]').value;
     this.form = document.querySelector('#registration-form');
     this.allFields = document.querySelectorAll('#registration-form .form-control');
     this.insertValidationElements();
@@ -2375,6 +2376,7 @@ var RegistrationForm = /*#__PURE__*/function () {
                 _context.prev = 2;
                 _context.next = 5;
                 return axios__WEBPACK_IMPORTED_MODULE_4___default().post('/doesEmailExist', {
+                  _csrf: this._csrf,
                   email: this.email.value
                 });
 
@@ -2447,6 +2449,7 @@ var RegistrationForm = /*#__PURE__*/function () {
 
       if (this.username.errors) return;
       axios__WEBPACK_IMPORTED_MODULE_4___default().post('/doesUsernameExist', {
+        _csrf: this._csrf,
         username: this.username.value
       }).then(function (response) {
         if (response.data) {
@@ -2517,6 +2520,7 @@ var Search = /*#__PURE__*/function () {
   function Search() {
     (0,_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__["default"])(this, Search);
 
+    this._csrf = document.querySelector('[name="_csrf"]').value;
     this.injectHTML();
     this.headerSearchIcon = document.querySelector('.header-search-icon');
     this.overlay = document.querySelector('.search-overlay');
@@ -2581,6 +2585,7 @@ var Search = /*#__PURE__*/function () {
       var _this3 = this;
 
       axios__WEBPACK_IMPORTED_MODULE_2___default().post('/search', {
+        _csrf: this._csrf,
         searchTerm: this.inputField.value
       }).then(function (response) {
         console.log(response.data);

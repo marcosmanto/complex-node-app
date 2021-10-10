@@ -1,7 +1,8 @@
-import axios from "axios"
+import axios from 'axios'
 
 export default class RegistrationForm {
   constructor() {
+    this._csrf = document.querySelector('[name="_csrf"]').value
     this.form = document.querySelector('#registration-form')
     this.allFields = document.querySelectorAll('#registration-form .form-control')
     this.insertValidationElements()
@@ -58,15 +59,13 @@ export default class RegistrationForm {
     this.passwordImmediately()
     this.passwordAfterDelay()
 
-    if(this.username.isUnique && !this.username.errors &&
-       this.email.isUnique && !this.email.errors &&
-       !this.password.errors) {
+    if (this.username.isUnique && !this.username.errors && this.email.isUnique && !this.email.errors && !this.password.errors) {
       this.form.submit()
     }
   }
 
   isDifferent(el, handler) {
-    if(el.previousValue !== el.value) {
+    if (el.previousValue !== el.value) {
       handler.call(this)
     }
     el.previousValue = el.value
@@ -93,72 +92,72 @@ export default class RegistrationForm {
   }
 
   passwordImmediately() {
-    if(this.password.value.length > 50) {
+    if (this.password.value.length > 50) {
       this.showValidationError(this.password, 'Password cannot exceed 50 characters.')
     }
 
-    if(!this.password.errors) {
+    if (!this.password.errors) {
       this.hideValidationError(this.password)
     }
   }
 
   passwordAfterDelay() {
-    if(this.password.value.length < 8) {
+    if (this.password.value.length < 8) {
       this.showValidationError(this.password, 'Password must be at least 8 characters.')
     }
   }
 
   async emailAfterDelay() {
-    if(!/^\S+@\S+$/.test(this.email.value)) {
+    if (!/^\S+@\S+$/.test(this.email.value)) {
       this.showValidationError(this.email, 'You must provide a valid email address.')
     }
 
-    if(!this.email.errors) {
+    if (!this.email.errors) {
       try {
-        const response = await axios.post('/doesEmailExist', {email: this.email.value})
-        if(response.data.error) {
+        const response = await axios.post('/doesEmailExist', { _csrf: this._csrf, email: this.email.value })
+        if (response.data.error) {
           throw new Error(response.data.error)
         }
         this.email.isUnique = response.data ? false : true
-      } catch(error) {
+      } catch (error) {
         this.showValidationError(this.email, error.message)
         return
       }
 
-      if(!this.email.isUnique) {
+      if (!this.email.isUnique) {
         this.showValidationError(this.email, 'That email is already being used.')
       } else {
         this.hideValidationError(this.email)
       }
-
     }
   }
 
   usernameImmediately() {
     // username is not empty AND is not alphanumeric
-    if(this.username.value !== '' && !/^([a-zA-Z0-9]+)$/.test(this.username.value)) {
+    if (this.username.value !== '' && !/^([a-zA-Z0-9]+)$/.test(this.username.value)) {
       this.showValidationError(this.username, 'Username can only contain letters and numbers.')
     }
 
-    if(this.username.value.length > 30) {
+    if (this.username.value.length > 30) {
       this.showValidationError(this.username, 'Username cannot exceed 30 characters.')
     }
 
-    if(!this.username.errors) {
+    if (!this.username.errors) {
       this.hideValidationError(this.username)
     }
   }
 
   usernameAfterDelay() {
-    if(this.username.value.length < 3) {
+    if (this.username.value.length < 3) {
       this.showValidationError(this.username, 'Username must be at least 3 characters.')
     }
 
-    if(this.username.errors) return
+    if (this.username.errors) return
 
-    axios.post('/doesUsernameExist', {username: this.username.value})
+    axios
+      .post('/doesUsernameExist', { _csrf: this._csrf, username: this.username.value })
       .then(response => {
-        if(response.data) {
+        if (response.data) {
           this.showValidationError(this.username, 'That username is already taken.')
           this.username.isUnique = false
         } else {

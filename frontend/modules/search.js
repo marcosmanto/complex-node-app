@@ -2,9 +2,9 @@ import axios from 'axios'
 import { normalizeSpaces } from './Utils'
 import DOMPurify from 'dompurify'
 export default class Search {
-
   // DOM elements and useful data
   constructor() {
+    this._csrf = document.querySelector('[name="_csrf"]').value
     this.injectHTML()
     this.headerSearchIcon = document.querySelector('.header-search-icon')
     this.overlay = document.querySelector('.search-overlay')
@@ -26,7 +26,7 @@ export default class Search {
       evt.preventDefault()
       this.overlay.classList.remove('search-overlay--visible')
     })
-    this.headerSearchIcon.addEventListener('click', (event) => {
+    this.headerSearchIcon.addEventListener('click', event => {
       event.preventDefault()
       this.openOverlay()
     })
@@ -37,7 +37,7 @@ export default class Search {
   keyPressHandler() {
     let value = this.inputField.value
 
-    if(normalizeSpaces(value) === '') {
+    if (normalizeSpaces(value) === '') {
       clearTimeout(this.typingWaitTimer)
       this.hideLoaderIcon()
       this.hideResultsArea()
@@ -50,13 +50,17 @@ export default class Search {
       this.hideResultsArea()
       this.typingWaitTimer = setTimeout(() => {
         this.sendRequest()
-      }, 750);
+      }, 750)
     }
     this.previousValue = value
   }
 
   sendRequest() {
-    axios.post('/search', {searchTerm: this.inputField.value})
+    axios
+      .post('/search', {
+        _csrf: this._csrf,
+        searchTerm: this.inputField.value,
+      })
       .then(response => {
         console.log(response.data)
         this.renderResultsHTML(response.data)
@@ -67,16 +71,18 @@ export default class Search {
   }
 
   renderResultsHTML(posts) {
-    if(posts.length) {
+    if (posts.length) {
       this.resultsArea.innerHTML = DOMPurify.sanitize(`<div class="list-group shadow-sm">
       <div class="list-group-item active"><strong>Search Results</strong> (${posts.length > 1 ? `${posts.length} items found` : `1 item found`})</div>
-      ${posts.map(post => {
-        const postDate = new Date(post.createdDate)
-        return `<a href="/post/${post._id}" class="list-group-item list-group-item-action">
+      ${posts
+        .map(post => {
+          const postDate = new Date(post.createdDate)
+          return `<a href="/post/${post._id}" class="list-group-item list-group-item-action">
         <img class="avatar-tiny" src="${post.author.avatar}"> <strong>${post.title}</strong>
         <span class="text-muted small">by ${post.author.username} on ${postDate.getMonth() + 1}/${postDate.getDate()}/${postDate.getFullYear()}</span>
       </a>`
-      }).join('')}
+        })
+        .join('')}
     </div>`)
     } else {
       this.resultsArea.innerHTML = `<p class="alert alert-danger text-center shadow-sm">Sorry, we could not find any results for that search.</p>`
@@ -107,7 +113,9 @@ export default class Search {
   }
 
   injectHTML() {
-    document.body.insertAdjacentHTML('beforeend', `  <div class="search-overlay">
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `  <div class="search-overlay">
     <div class="search-overlay-top shadow-sm">
       <div class="container container--narrow">
         <label for="live-search-field" class="search-overlay-icon"><i class="fas fa-search"></i></label>
@@ -122,6 +130,7 @@ export default class Search {
         <div class="live-search-results"></div>
       </div>
     </div>
-  </div>`)
+  </div>`
+    )
   }
 }
