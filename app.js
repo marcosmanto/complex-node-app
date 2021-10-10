@@ -7,6 +7,12 @@ const csrf = require('csurf')
 const sanitizeHTML = require('sanitize-html')
 const app = express()
 
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+
+// bottom app.use are not applied to these routes
+app.use('/api', require('./router-api'))
+
 const sessionOptions = session({
   secret: 'Javascript is sooooooooo cooooooollllll',
   resave: false,
@@ -24,8 +30,7 @@ app.set('view engine', 'ejs')
 app.use(express.static('public'))
 app.use(sessionOptions)
 app.use(flash())
-app.use(express.urlencoded({ extended: true }))
-app.use(express.json())
+
 app.use((req, res, next) => {
   // make markdown available inside ejs views
   res.locals.filterUserHTML = function (content) {
