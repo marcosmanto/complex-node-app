@@ -1,9 +1,8 @@
 const mongodb = require('mongodb')
 
-/* // remove dotenv for Heroku
+// remove dotenv for Heroku
 const dotenv = require('dotenv')
 dotenv.config()
-*/
 
 mongodb.MongoClient.connect(process.env.CONNECTIONSTRING, { useNewUrlParser: true, useUnifiedTopology: true }, (err, client) => {
   if (err && err.stack.toLowerCase().includes('timeout')) {

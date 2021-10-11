@@ -5,6 +5,12 @@ const { ObjectId } = require('bson')
 const UserES6 = require('./UserES6')
 const sanitizeHTML = require('sanitize-html')
 
+// create indexes for text search if they not exist
+postsCollection.createIndex({
+  title: 'text',
+  body: 'text',
+})
+
 class Post {
   #allowedFields = ['title', 'body']
   #transformations = [onlyString, trimVal, sanitizeVal]
@@ -30,8 +36,12 @@ class Post {
   static search(searchTerm) {
     return new Promise(async (resolve, reject) => {
       if (typeof searchTerm === 'string') {
-        let posts = await Post.reusablePostQuery([{ $match: { $text: { $search: searchTerm } } }], undefined, [{ $sort: { score: { $meta: 'textScore' } } }])
-        resolve(posts)
+        try {
+          let posts = await Post.reusablePostQuery([{ $match: { $text: { $search: searchTerm } } }], undefined, [{ $sort: { score: { $meta: 'textScore' } } }])
+          resolve(posts)
+        } catch (error) {
+          reject(error)
+        }
       } else {
         reject()
       }
@@ -55,17 +65,21 @@ class Post {
         ])
         .concat(finalOperations)
 
-      let posts = await postsCollection.aggregate(aggOperations).toArray()
-
-      posts = posts.map(post => {
-        post.isVisitorOwner = post.authorId.equals(visitorId)
-        post.authorId = undefined
-        post.author = cleanObject(post.author, ['username', 'email'])
-        post.author.avatar = UserES6.getAvatar(post.author.email)
-        return post
-      })
-
-      resolve(posts)
+      try {
+        let posts = await postsCollection.aggregate(aggOperations).toArray()
+        posts = posts.map(post => {
+          post.isVisitorOwner = post.authorId.equals(visitorId)
+          post.authorId = undefined
+          post.author = cleanObject(post.author, ['username', 'email'])
+          post.author.avatar = UserES6.getAvatar(post.author.email)
+          return post
+        })
+        resolve(posts)
+      } catch (error) {
+        console.log(error)
+        resolve([])
+        return
+      }
     })
   }
 

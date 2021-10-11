@@ -106,7 +106,8 @@ exports.search = function (req, res) {
     .then(posts => {
       res.json(posts)
     })
-    .catch(() => {
+    .catch(error => {
+      console.log(error)
       res.json([])
     })
 }
